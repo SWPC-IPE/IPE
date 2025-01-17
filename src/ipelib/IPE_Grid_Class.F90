@@ -62,6 +62,7 @@ MODULE IPE_Grid_Class
 
   END TYPE IPE_Grid
 
+! am_2024.04 Hard wired mag. longitudinal resolution
 REAL(prec), PARAMETER, PRIVATE :: dlonm90km = 4.5_prec
 
 CONTAINS
@@ -179,7 +180,8 @@ CONTAINS
     grid % ii3_interface    = 0
     grid % ii4_interface    = 0
 
-
+    ! am_2024.11 hard-wired dimensions - this does not work for flexible grid
+    ! set it here but later use the value on the grid file if the mlon array exists 
     DO i = mp_low-halo, mp_high+halo
       grid % magnetic_longitude(i) = REAL( (i-1),prec )*dlonm90km*dtr
     ENDDO
@@ -286,6 +288,9 @@ CONTAINS
         grid % northern_top_index(lp) = im
         grid % southern_top_index(lp) = im + 1
       ENDIF
+      
+       write(6,'("IPEgrid_MIDPT ",2(x,e15.8),5(x,i5))') params % mesh_height_max,grid % altitude(im,lp), &
+         im,lp,grid%flux_tube_midpoint(lp),grid%northern_top_index(lp),grid%southern_top_index(lp)
 
     ENDDO
 
@@ -312,6 +317,7 @@ CONTAINS
     rc = IPE_FAILURE
 
     ! -- open grid file for reading
+    write(6,*) 'ipe_grid_read_file filename  ',filename  ! only diagnostic
     call io % open(filename, "r")
     if (io % err % check(msg="Unable to open file "//filename, &
       file=__FILE__,line=__LINE__)) return
@@ -398,13 +404,14 @@ CONTAINS
     ie = ubound(grid % l_magnitude, dim=1)
     js = lbound(grid % l_magnitude, dim=2)
     je = ubound(grid % l_magnitude, dim=2)
-    do j = js, je
-      do i = is, ie
-        write(dset_name, '("/apex_grid/l_magnitude_",2i0)') i, j
-        call io % read(dset_name, grid % l_magnitude(i,j,:,:,mp_beg:mp_end))
-        if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-      end do
-    end do
+! am_2024.04 not needed    
+!    do j = js, je
+!      do i = is, ie
+!        write(dset_name, '("/apex_grid/l_magnitude_",2i0)') i, j
+!        call io % read(dset_name, grid % l_magnitude(i,j,:,:,mp_beg:mp_end))
+!        if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!      end do
+!    end do
 
     ! -- apex e
     dset_name = ""
@@ -460,10 +467,10 @@ CONTAINS
     call io % read(dset_name, grid % magnetic_colatitude)
     if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
 
-    dset_name = "/apex_grid/r_meter"
-    call io % read(dset_name, grid % r_meter)
-    if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-
+! am_2024.04 not needed in IPE
+!    dset_name = "/apex_grid/r_meter"
+!    call io % read(dset_name, grid % r_meter)
+!    if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
 
     ! -- apex 1d variables
     ! -- reset domain
@@ -489,6 +496,19 @@ CONTAINS
     dset_name = "/apex_grid/northern_top"
     call io % read(dset_name, grid % northern_top_index)
     if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+    
+    ! am_2024.11 add for the new grid (if field does not exist then the hard-wireed values should be used)
+    ! -- magnetic  longitude
+    ! -- reset domain
+    call io % domain(fdims(3:3), mstart(3:3), mcount(3:3))
+    if (io % err % check(msg="Unable to setup 1D apex I/O decomposition",file=__FILE__,line=__LINE__))  return
+
+    dset_name = "/apex_grid/mlon"
+    call io % read(dset_name, grid % magnetic_longitude(mp_beg:mp_end))
+    if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) then
+       write(6,*) 'IPE_Grid_Class: Old IPE grid file - Unable to read dataset ',dset_name
+      !  return ! for new IPE grid file mlon will be used
+    end if
 
     ! -- periodic boundary conditions for B and q_factor if needed
     if (grid % mp_halo > 0) then
@@ -547,61 +567,67 @@ CONTAINS
     dset_name = ""
     is = lbound(grid % facfac_interface, dim=1)
     ie = ubound(grid % facfac_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/fac_",i0)') i
-      call io % read(dset_name, grid % facfac_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not used
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/fac_",i0)') i
+!      call io % read(dset_name, grid % facfac_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- dd
     dset_name = ""
     is = lbound(grid % dd_interface, dim=1)
     ie = ubound(grid % dd_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/dd_",i0)') i
-      call io % read(dset_name, grid % dd_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not used
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/dd_",i0)') i
+!      call io % read(dset_name, grid % dd_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- ii1
     dset_name = ""
     is = lbound(grid % ii1_interface, dim=1)
     ie = ubound(grid % ii1_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/ii1_",i0)') i
-      call io % read(dset_name, grid % ii1_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not used
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/ii1_",i0)') i
+!      call io % read(dset_name, grid % ii1_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- ii2
     dset_name = ""
     is = lbound(grid % ii2_interface, dim=1)
     ie = ubound(grid % ii2_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/ii2_",i0)') i
-      call io % read(dset_name, grid % ii2_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not used
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/ii2_",i0)') i
+!      call io % read(dset_name, grid % ii2_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- ii3
     dset_name = ""
     is = lbound(grid % ii3_interface, dim=1)
     ie = ubound(grid % ii3_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/ii3_",i0)') i
-      call io % read(dset_name, grid % ii3_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not used
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/ii3_",i0)') i
+!      call io % read(dset_name, grid % ii3_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- ii4
     dset_name = ""
     is = lbound(grid % ii4_interface, dim=1)
     ie = ubound(grid % ii4_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/ii4_",i0)') i
-      call io % read(dset_name, grid % ii4_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not used
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/ii4_",i0)') i
+!      call io % read(dset_name, grid % ii4_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- close grid file
     call io % close()
@@ -801,61 +827,67 @@ CONTAINS
     dset_name = ""
     is = lbound(grid % facfac_interface, dim=1)
     ie = ubound(grid % facfac_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/fac_",i0)') i
-      call io % write(dset_name, grid % facfac_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not needed    
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/fac_",i0)') i
+!      call io % write(dset_name, grid % facfac_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- dd
     dset_name = ""
     is = lbound(grid % dd_interface, dim=1)
     ie = ubound(grid % dd_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/dd_",i0)') i
-      call io % write(dset_name, grid % dd_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not needed    
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/dd_",i0)') i
+!      call io % write(dset_name, grid % dd_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- ii1
     dset_name = ""
     is = lbound(grid % ii1_interface, dim=1)
     ie = ubound(grid % ii1_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/ii1_",i0)') i
-      call io % write(dset_name, grid % ii1_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not needed    
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/ii1_",i0)') i
+!      call io % write(dset_name, grid % ii1_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- ii2
     dset_name = ""
     is = lbound(grid % ii2_interface, dim=1)
     ie = ubound(grid % ii2_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/ii2_",i0)') i
-      call io % write(dset_name, grid % ii2_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not needed    
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/ii2_",i0)') i
+!      call io % write(dset_name, grid % ii2_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- ii3
     dset_name = ""
     is = lbound(grid % ii3_interface, dim=1)
     ie = ubound(grid % ii3_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/ii3_",i0)') i
-      call io % write(dset_name, grid % ii3_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not needed    
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/ii3_",i0)') i
+!      call io % write(dset_name, grid % ii3_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- ii4
     dset_name = ""
     is = lbound(grid % ii4_interface, dim=1)
     ie = ubound(grid % ii4_interface, dim=1)
-    do i = is, ie
-      write(dset_name, '("/apex_grid/ii4_",i0)') i
-      call io % write(dset_name, grid % ii4_interface(i,:,:,:))
-      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
-    end do
+! am_2024.04 not needed    
+!    do i = is, ie
+!      write(dset_name, '("/apex_grid/ii4_",i0)') i
+!      call io % write(dset_name, grid % ii4_interface(i,:,:,:))
+!      if (io % err % check(msg="Unable to write dataset "//dset_name, file=__FILE__,line=__LINE__)) return
+!    end do
 
     ! -- restore output from all processes
     call io % pause(.false.)
