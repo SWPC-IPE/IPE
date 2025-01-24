@@ -289,8 +289,8 @@ CONTAINS
         grid % southern_top_index(lp) = im + 1
       ENDIF
       
-       write(6,'("IPEgrid_MIDPT ",2(x,e15.8),5(x,i5))') params % mesh_height_max,grid % altitude(im,lp), &
-         im,lp,grid%flux_tube_midpoint(lp),grid%northern_top_index(lp),grid%southern_top_index(lp)
+       !write(6,'("IPEgrid_MIDPT ",2(x,e15.8),5(x,i5))') params % mesh_height_max,grid % altitude(im,lp), &
+       !  im,lp,grid%flux_tube_midpoint(lp),grid%northern_top_index(lp),grid%southern_top_index(lp)
 
     ENDDO
 
@@ -337,6 +337,7 @@ CONTAINS
     grid % nFluxTube = fdims(1)
     grid % NLP       = fdims(2)
     grid % NMP       = fdims(3)
+    write(6,*) 'ipe_grid_read_file dimensions  ',fdims
 
     ! -- setup domain decomposition across MPI tasks
     call mpl % Set_Domain( grid % NLP, grid % NMP, rc )
@@ -481,6 +482,7 @@ CONTAINS
     call io % read(dset_name, grid % p_value)
     if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return
 
+    !dset_name = "/apex_grid/tube_mid"
     dset_name = "/apex_grid/tube_midpoint"
     call io % read(dset_name, grid % flux_tube_midpoint)
     if (io % err % check(msg="Unable to read dataset "//dset_name, file=__FILE__,line=__LINE__)) return

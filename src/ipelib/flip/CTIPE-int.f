@@ -7,7 +7,11 @@ C.... Written by P. Richards June 2010.
         IMPLICIT NONE
         !... Check dimensions are the same in all FLIP modules
         INTEGER JMIN,JMAX   !.. first and last indices on field line grid
-        INTEGER, PARAMETER :: FLDIM = 1115     !.. Field line grid dimension
+	!
+	!am_2024.11 hard wired #ofPoints
+        !INTEGER, PARAMETER :: FLDIM =  329      !.. Field line grid dimension along the longest fileline
+        INTEGER, PARAMETER :: FLDIM = 1115     !.. Field line grid dimension original grid
+	!
         DOUBLE PRECISION Z(FLDIM),SZA(FLDIM)  !.. altitude, Solar zenith angle
         DOUBLE PRECISION BM(FLDIM)            !.. magnetic field strength
         DOUBLE PRECISION SL(FLDIM)            !.. distance along the field line
@@ -18,9 +22,11 @@ C.... Ion densities and velocities
 C.... Written by P. Richards June 2010.
 C.... O+ H+ He+ N+ NO+ O2+ N2+ O+(2D) O+(2P)
       MODULE ION_DEN_VEL
+        use FIELD_LINE_GRID, only: fldim
         IMPLICIT NONE
         !... Check dimensions are the same in all FLIP modules
-        INTEGER, PARAMETER :: IDIM = 1115  !.. Field line grid dimension
+        INTEGER, PARAMETER :: IDIM = FLDIM !.. Field line grid dimension am_2024.11 hard wirewd #ofPoints
+        !INTEGER, PARAMETER :: IDIM = 1115  !.. Field line grid dimension
         INTEGER, PARAMETER :: ISPEC = 9   !.. Species dimension
       !.. Ion densities & Velocities
       DOUBLE PRECISION XIONN(ISPEC,IDIM),XIONV(ISPEC,IDIM)
@@ -30,9 +36,11 @@ C.... This module is used to conserve space used by the Newton solver.
 C.... The arrays are workspace for the solver
 C.... Written by P. Richards June 2010.
       MODULE SOLVARR
+        use FIELD_LINE_GRID, only: fldim
         IMPLICIT NONE
         !... Check dimensions are the same in all FLIP modules
-        INTEGER, PARAMETER :: SDIM = 1115  !.. Field line grid dimension
+        INTEGER, PARAMETER :: SDIM = FLDIM !.. Field line grid dimension am_2024.11 hard wierd #ofPoints
+        !INTEGER, PARAMETER :: SDIM = 1115  !.. Field line grid dimension
         DOUBLE PRECISION DELTA(3*SDIM),RHS(3*SDIM)
         DOUBLE PRECISION WORK(15*SDIM),S(15*SDIM)
       END MODULE SOLVARR
@@ -41,9 +49,11 @@ C.... Contains the neutral densities and temperatures, O+ production, electron
 C.... heating
 C.... Written by P. Richards June 2010.
       MODULE THERMOSPHERE
+        use FIELD_LINE_GRID, only: fldim
         IMPLICIT NONE
         !... Check dimensions are the same in all FLIP modules
-        INTEGER, PARAMETER :: TDIM = 1115  !.. Field line grid dimension
+        INTEGER, PARAMETER :: TDIM = FLDIM !.. Field line grid dimension am_2024.11 hard wired #ofPoints
+        !INTEGER, PARAMETER :: TDIM = 1115  !.. Field line grid dimension
         DOUBLE PRECISION ON(TDIM),HN(TDIM),N2N(TDIM),O2N(TDIM),HE(TDIM)
         DOUBLE PRECISION TN(TDIM),UN(TDIM),TINF(TDIM)
         DOUBLE PRECISION EHT(3,TDIM)
@@ -53,9 +63,11 @@ C::::::::::::::::::::::::::: AVE_PARAMS :::::::::::::::::
 C.... Computes midpoint values associated with the field line grid
 C.... Written by P. Richards June 2010.
       MODULE AVE_PARAMS
+        use FIELD_LINE_GRID, only: fldim
         IMPLICIT NONE
         !... Check dimensions are the same in all FLIP modules
-        INTEGER, PARAMETER :: AVDIM = 1115  !.. Field line grid dimension
+        INTEGER, PARAMETER :: AVDIM = FLDIM !.. Field line grid dimension am_2024.11 hard wired #ofPoints
+        !INTEGER, PARAMETER :: AVDIM = 1115  !.. Field line grid dimension
         DOUBLE PRECISION TEJ(AVDIM),TIJ(AVDIM),NUX(2,AVDIM), RBM(AVDIM)
         DOUBLE PRECISION UNJ(AVDIM),DS(AVDIM)
         DOUBLE PRECISION GRADTE(AVDIM),GRADTI(AVDIM),GRAV(AVDIM)
@@ -67,9 +79,11 @@ C.... Written by P. Richards August 2010.
       !.. Total ionization and excitation rates (EUV + PE + Aurora)
       !..EUVION PEXCIT PEPION OTHPR1 OTHPR2 SUMION SUMEXC PAUION PAUEXC NPLSPRD
       MODULE PRODUCTION
+        use FIELD_LINE_GRID, only: fldim
         IMPLICIT NONE
         !... Check dimensions are the same in all FLIP modules
-        INTEGER, PARAMETER :: PDIM = 1115  !.. Field line grid dimension
+        INTEGER, PARAMETER :: PDIM = FLDIM !.. Field line grid dimension am_2024.11 hard wired #ofPoints
+        !INTEGER, PARAMETER :: PDIM = 1115  !.. Field line grid dimension
       !.. EUV and photoelectron production rates
       REAL EUVION(3,12,PDIM),PEXCIT(3,12,PDIM),PEPION(3,12,PDIM)
       DOUBLE PRECISION OTHPR1(6,PDIM),OTHPR2(6,PDIM)
@@ -85,9 +99,11 @@ C.... Contains the minor neutral densities
 C.... Written by P. Richards September 2010.
       !.. USE MINORNEUT N4S N2D NNO N2P N2A O1D O1S
       MODULE MINORNEUT
+        use FIELD_LINE_GRID, only: fldim
         IMPLICIT NONE
         !... Check dimensions are the same in all FLIP modules
-        INTEGER, PARAMETER :: NDIM = 1115  !.. Field line grid dimension
+        INTEGER, PARAMETER :: NDIM = FLDIM !.. Field line grid dimension am_2024.11 hard wired #ofPoints
+        !INTEGER, PARAMETER :: NDIM = 1115  !.. Field line grid dimension
         DOUBLE PRECISION N4S(NDIM),N2D(NDIM),NNO(NDIM),N2P(NDIM),
      >    N2A(NDIM),O1D(NDIM),O1S(NDIM),EQN2D(NDIM)
       END MODULE MINORNEUT

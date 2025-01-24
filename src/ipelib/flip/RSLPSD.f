@@ -8,7 +8,7 @@ C--- tested to ensure non -ve densities (modified steepest descent).
 C--- Consult file RSLPSD-Algorithm.doc for detailed explanation
       SUBROUTINE DLOOPS(JMIN,   !.. first point on the field line
      >                  JMAX,   !.. last point on the field line
-     >                 FLDIM,   !.. Field line grid array dimension
+     >              FLDIM_IN,   !.. Field line grid array dimension am_2024.11 hard wird #ofPoints
      >                     Z,   !.. Altitude array
      >                     N,   !.. O+, H+, He+, minor ion densities array
      >                    TI,   !.. Ion and electron temperatures
@@ -21,7 +21,7 @@ C--- Consult file RSLPSD-Algorithm.doc for detailed explanation
 !dbg20120301: N+ problem: "IN BDSLV &&&&&&& BANDWIDTH IS TOO LARGE "
       IMPLICIT NONE
       integer mp,lp,i_which_call
-      INTEGER FLDIM                      !.. Field line grid array dimension
+      INTEGER FLDIM_IN                   !.. Field line grid array dimension am_2024.11 hard wird #ofPoints
       INTEGER NFLAG,EFLAG(11,11)         !.. error flags
       INTEGER I,J,JC,ITER                !.. Loop control variables
       INTEGER IDIV,KR,ION,IEQ,MIT        !.. solution variables
@@ -30,15 +30,15 @@ C--- Consult file RSLPSD-Algorithm.doc for detailed explanation
       INTEGER DCLON,DCLOS,DCUPP          !.. tests for convergence region
       DOUBLE PRECISION DT,DTIN,DTMIN,DTINC !.. Time step variables
       DOUBLE PRECISION ZLBDY               !.. lower boundary altitudes for N
-      DOUBLE PRECISION DCRQ(2,FLDIM),DCR(2)      !.. solution variables
+      DOUBLE PRECISION DCRQ(2,FLDIM_IN),DCR(2)   !.. solution variables am_2024.11 hard wird #ofPoints
       DOUBLE PRECISION DCRP,DCRT,ADCR,DINC,F(20) !.. solution variables
       !.. see above for description of Z,N,TI,HE
-      DOUBLE PRECISION Z(FLDIM),N(4,FLDIM),TI(3,FLDIM)
+      DOUBLE PRECISION Z(FLDIM_IN),N(4,FLDIM_IN),TI(3,FLDIM_IN)
       DOUBLE PRECISION RATIN,RATIS,FACIRI,ALPHA
       !.. N and V at previous time step for convergence failure
-      DOUBLE PRECISION NORIG(2,FLDIM),VORIG(2,FLDIM)
+      DOUBLE PRECISION NORIG(2,FLDIM_IN),VORIG(2,FLDIM_IN)
       !.. N and T at previous intermediate time step for dN/dt and dT/dt
-      DOUBLE PRECISION NSAVE(2,FLDIM),TISAV(3,FLDIM)
+      DOUBLE PRECISION NSAVE(2,FLDIM_IN),TISAV(3,FLDIM_IN)
       DATA NION/2/  !.. # ions (i.e. O+ and H+)
 
       DT=DTIN           !.. Set time step for dN/dt
@@ -126,10 +126,10 @@ C*** OUTER LOOP: Return here on Non-Convergence with reduced time step
         DO ITER=1,20
           !.. boundary conditions on density. 
           DO J=JMIN,JBNN
-            CALL HOEQ(FLDIM,J,N,TI)
+            CALL HOEQ(FLDIM_IN,J,N,TI)
           ENDDO
           DO J=JBNS,JMAX
-            CALL HOEQ(FLDIM,J,N,TI)
+            CALL HOEQ(FLDIM_IN,J,N,TI)
           ENDDO
 
           !.. Compute current FIJ values to use in calculating dF/dn
@@ -142,7 +142,8 @@ C*** OUTER LOOP: Return here on Non-Convergence with reduced time step
           ENDDO
 
           !.. Create the Jacobian matrix
-          CALL DMATRX(FLDIM,S,RHS,IEQ,DT,N,TI,JBNN,JBNS,MIT,NION,NSAVE)
+          CALL DMATRX(FLDIM_IN,S,RHS,IEQ,DT,N,TI,JBNN,JBNS,MIT,NION,
+     |                NSAVE)
 
           !.. Solve the linear system with the band solver
           !.. invert the jacobian matrix 'S' in the inversion routine BDSLV.
@@ -290,7 +291,7 @@ C*** END OF OUTER LOOP:
 C:::::::::::::::::::::::::: HOEQ :::::::::::::::::::::::::::::::::::::::::::::::::
 C.....  finds the new chemical equilibrium densities
 C.....  of O+ and H+ at point j
-      SUBROUTINE HOEQ(FLDIM,   !.. Field line grid array dimension
+      SUBROUTINE HOEQ(FLDIM_IN,!.. Field line grid array dimension am_2024.11 hard wird #ofPoints
      >                    J,   !.. point on the field line
      >                    N,   !.. O+, H+, He+, minor ion densities array
      >                   TI)   !.. Ion and electron temperatures
@@ -298,9 +299,9 @@ C.....  of O+ and H+ at point j
       !..EUVION PEXCIT PEPION OTHPR1 OTHPR2 SUMION SUMEXC PAUION PAUEXC NPLSPRD
       USE PRODUCTION !.. EUV, photoelectron, and auroral production, PHION
       IMPLICIT NONE
-      INTEGER FLDIM   !.. field line grid dimension
+      INTEGER FLDIM_IN !.. field line grid dimension am_2024.11 hard wird #ofPoints
       INTEGER J       !.. Field line grid array dimension
-      DOUBLE PRECISION RTS(99),N(4,FLDIM),TI(3,FLDIM)
+      DOUBLE PRECISION RTS(99),N(4,FLDIM_IN),TI(3,FLDIM_IN)
       DOUBLE PRECISION LOPLS,LOPLS2,LHPLS   !.. O+, H+ loss rates
 
       !.. Get reaction rates

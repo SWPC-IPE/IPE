@@ -186,14 +186,14 @@ C:::::::::::::::::::::::::::::::: GET_EcoolI ::::::::::::::::::::::
 C.. Electron-ion energy exchange rate. Note that electrons usually 
 C.. heat ions but ions can heat electrons at night
       SUBROUTINE GET_EcoolI(K,   !.. point on field line
-     >                  FLDIM,   !.. Field line dimension
+     >               FLDIM_IN,   !.. Field line dimension ! am_2024.11 hard wired #ofPoints
      >                     TE,   !.. Electron temperature
      >                     TI,   !.. Ion temperature
      >                     BM,   !.. Ion temperature
      >                 CE_ION)   !.. OUTPUT: Ion cooling to neutrals
       USE ION_DEN_VEL        !.. O+ H+ He+ N+ NO+ O2+ N2+ O+(2D) O+(2P)
       IMPLICIT NONE
-      INTEGER K,FLDIM                   !.. See I/O parameter comments
+      INTEGER K,FLDIM_IN                !.. See I/O parameter comments
       DOUBLE PRECISION TE,TI,BM,CE_ION  !.. See I/O parameter comments
       DOUBLE PRECISION NE,NI            !.. Electron and ion density
       DOUBLE PRECISION DEBYE,COULOG     !.. Factors for i-e cooling rate

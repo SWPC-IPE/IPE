@@ -329,12 +329,12 @@ C.... for more details
       END
 C::::::::::::::::::::::::::: MCHEMQ :::::::::::::::::::::::::::::::::::::
 C... Gets the chemical equilibrium density for He+
-      SUBROUTINE MCHEMQ(J,DUM,N,TI,FLDIM)
+      SUBROUTINE MCHEMQ(J,DUM,N,TI,FLDIM_IN)
       USE THERMOSPHERE  !.. ON HN N2N O2N HE TN UN EHT COLFAC
       !..EUVION PEXCIT PEPION OTHPR1 OTHPR2 SUMION SUMEXC PAUION PAUEXC NPLSPRD
       USE PRODUCTION !.. EUV, photoelectron, and auroral production
       IMPLICIT NONE
-      INTEGER J,FLDIM     !.. Field line index & dimension
+      INTEGER J,FLDIM_IN    ! am_2024.11 hard wird #ofPoints defined in module !.. Field line index & dimension
       DOUBLE PRECISION N(4,FLDIM),TI(3,FLDIM)    !.. He+,N+ & Ti,Te
       DOUBLE PRECISION RTS(99),DUM(9),HELOSS
       CALL RATS(J,TI(3,J),TI(1,J),TN(J),RTS)
@@ -346,14 +346,14 @@ C... Gets the chemical equilibrium density for He+
       END
 C::::::::::::::::::::::::::::: NCHEMQ :::::::::::::::::::::::::::::::::::::
 C... Gets the chemical equilibrium density for N+
-      SUBROUTINE NCHEMQ(J,DUM,N,TI,FLDIM)
+      SUBROUTINE NCHEMQ(J,DUM,N,TI,FLDIM_IN)
       USE THERMOSPHERE  !.. ON HN N2N O2N HE TN UN EHT COLFAC
       USE MINORNEUT !.. N4S N2D NNO N2P N2A O1D O1S
       USE ION_DEN_VEL   !.. O+ H+ He+ N+ NO+ O2+ N2+ O+(2D) O+(2P)
       !..EUVION PEXCIT PEPION OTHPR1 OTHPR2 SUMION SUMEXC PAUION PAUEXC NPLSPRD
       USE PRODUCTION !.. EUV, photoelectron, and auroral production
       IMPLICIT NONE
-      INTEGER J,FLDIM     !.. Field line index & dimension
+      INTEGER J,FLDIM_IN     ! am_2024.11 hard wird #ofPoints defined in module !.. Field line index & dimension
       DOUBLE PRECISION N(4,FLDIM),TI(3,FLDIM)    !.. He+,N+ & Ti,Te
       DOUBLE PRECISION RTS(99),DUM(9),QNP,PNP
         CALL RATS(J,TI(3,J),TI(1,J),TN(J),RTS)

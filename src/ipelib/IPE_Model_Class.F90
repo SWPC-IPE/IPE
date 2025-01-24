@@ -93,8 +93,9 @@ CONTAINS
       line=__LINE__, file=__FILE__, rc=rc ) ) RETURN
 
     ! ////// grid ////// !
-
-    CALL ipe % grid % Build( ipe % io, ipe % mpi_layer, ipe % parameters, "IPE_Grid.h5", rc=localrc )
+! am_2024.04  
+   CALL ipe % grid % Build( ipe % io, ipe % mpi_layer, ipe % parameters, "IPE_Grid.h5", rc=localrc )
+!    CALL ipe % grid % Build( ipe % io, ipe % mpi_layer, ipe % parameters, "/scratch1/NCEPDEV/swpc/WAM-IPE_DATA/IPE_FIX/TEST_IpeGrid.h5", rc=localrc )
     IF ( ipe_error_check( localrc, msg="Failed to initialize model grid", &
       line=__LINE__, file=__FILE__, rc=rc ) ) RETURN
 

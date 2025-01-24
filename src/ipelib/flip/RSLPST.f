@@ -9,7 +9,7 @@ C--- descent). P. Richards May 2010
 C.... Consult file RSLPST-Algorithm.doc for detailed explanation
       SUBROUTINE TLOOPS(JMIN,   !.. first point on the field line
      >                  JMAX,   !.. last point on the field line
-     >                 FLDIM,   !.. Field line grid array dimension
+     >              FLDIM_IN,   !.. Field line grid array dimension am_2024.11 hard wired #ofPoints
      >                     Z,   !.. Altitude array
      >                     N,   !.. O+, H+, He+, minor ion densities array
      >                    TI,   !.. Ion and electron temperatures
@@ -20,7 +20,7 @@ C.... Consult file RSLPST-Algorithm.doc for detailed explanation
       USE THERMOSPHERE  !.. ON HN N2N O2N HE TN UN EHT COLFAC
       IMPLICIT NONE
       integer mp,lp,i_which_call
-      INTEGER FLDIM                !.. Field line grid array dimension
+      INTEGER FLDIM_IN                   !.. Field line grid array dimension am_2024.11 hard wired #ofPoints
       INTEGER NFLAG,EFLAG(11,11)         !.. error flags
       INTEGER I,J,JC,NTI,ITER            !.. Loop control variables
       INTEGER IDIV,KR,ION,IEQ,MIT        !.. solution variables
@@ -30,8 +30,9 @@ C.... Consult file RSLPST-Algorithm.doc for detailed explanation
       DOUBLE PRECISION bound_alt_den,bound_alt_temp       !.. lower boundary altitudes for N & T
       DOUBLE PRECISION DCRP,DCRT,DINC,F(20) !.. solution variables
       !.. see above for description of Z,N,TI,HE
-      DOUBLE PRECISION Z(FLDIM),N(4,FLDIM),TI(3,FLDIM)
-      DOUBLE PRECISION NSAVE(2,FLDIM),TISAV(3,FLDIM),TIORIG(3,FLDIM)
+      DOUBLE PRECISION Z(FLDIM_IN),N(4,FLDIM_IN),TI(3,FLDIM_IN)
+      DOUBLE PRECISION NSAVE(2,FLDIM_IN),TISAV(3,FLDIM_IN),
+     |                 TIORIG(3,FLDIM_IN)
       DATA bound_alt_den/120.0/,bound_alt_temp/101.0/
       DATA NTI/3/             !.. # of temperatures note T(O+)=T(H+)
 
@@ -98,10 +99,10 @@ C*** OUTER LOOP: Return here on Non-Convergence with reduced time step
   
           !.. boundary conditions on density. Needed here for temperatures
           DO J=JMIN,JBNN
-            CALL HOEQ(FLDIM,J,N,TI)
+            CALL HOEQ(FLDIM_IN,J,N,TI)
           ENDDO
           DO J=JBNS,JMAX
-            CALL HOEQ(FLDIM,J,N,TI)
+            CALL HOEQ(FLDIM_IN,J,N,TI)
          ENDDO
 
           !.. Compute FIJ values to use in calculating dF/dT
@@ -115,7 +116,7 @@ C*** OUTER LOOP: Return here on Non-Convergence with reduced time step
 
           !.. Create the Jacobian matrix. Note NTI-1 because only TE 
           !.. and one TI solved
-          CALL TMATRX(FLDIM,S,RHS,IEQ,DT,N,TI,
+          CALL TMATRX(FLDIM_IN,S,RHS,IEQ,DT,N,TI,
      >                 JBTN,JBTS,MIT,NTI-1,TISAV,mp,lp)
 
           !.. Solve the linear system with the band solver
